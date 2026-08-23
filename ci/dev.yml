@@ -1,0 +1,24 @@
+build_dev:
+  extends: .darkube_build
+  variables:
+    IMAGE_NAME: dev-learning-to-rank
+    DOCKERFILE: ./Dockerfile
+    EXTRA_FLAGS: >-
+      --build-arg JFROG_USER=${JFROG_USER}
+      --build-arg JFROG_PASS=${JFROG_PASS}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+
+
+deploy_dev:
+  extends: .darkube_deploy
+  needs:
+    - build_dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+  variables:
+    DEPLOY_TOKEN: $DEPLOY_TOKEN_AI_LEARNING_TO_RANK_KHODRO45_AI_HAMRAVESH_C11
+    APP_ID: $APP_ID_AI_LEARNING_TO_RANK_KHODRO45_AI_HAMRAVESH_C11
+
+

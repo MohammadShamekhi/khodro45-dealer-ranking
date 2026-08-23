@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#FF9532" />
+  <title>Dealer Intelligence — results</title>
+  <style>
+    :root {
+      --bg: #4f5866;
+      --panel: #5f6a7a;
+      --border: #8e98a8;
+      --text: #fafbfc;
+      --muted: #dce2eb;
+      --brand: #ff9532;
+      --accent: #ff9532;
+      --warn: #ff9532;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+      padding: 1.5rem 1rem;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    main {
+      width: 100%;
+      max-width: min(96vw, 72rem);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 0 0 0.35rem;
+      color: var(--brand);
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin: 0 auto 1.25rem;
+      max-width: 36rem;
+      text-align: center;
+    }
+    .sub code {
+      color: var(--brand);
+      background: rgba(255, 149, 50, 0.12);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+    form {
+      text-align: left;
+      background: var(--panel);
+      border: 1px solid rgba(255, 149, 50, 0.45);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      width: 100%;
+    }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+    label:first-of-type { margin-top: 0; }
+    .hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0.15rem 0 0;
+      line-height: 1.35;
+    }
+    .hint code {
+      color: var(--brand);
+      background: rgba(255, 149, 50, 0.1);
+      padding: 0.05em 0.3em;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+    input, select, button {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      padding: 0.5rem 0.65rem;
+      font-size: 0.875rem;
+    }
+    input:focus, select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: rgba(255, 149, 50, 0.55);
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    button {
+      width: auto;
+      cursor: pointer;
+      font-weight: 500;
+      border: none;
+      padding: 0.55rem 1rem;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #14110e;
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .out {
+      margin-top: 1.25rem;
+      width: 100%;
+      text-align: left;
+    }
+    .meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    pre,
+    .out-json {
+      margin: 0;
+      padding: 1rem;
+      background: var(--panel);
+      border: 1px solid rgba(255, 149, 50, 0.35);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: min(65vh, 32rem);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    .out-body {
+      margin: 0;
+      min-height: 2.5rem;
+    }
+    .table-wrap {
+      margin: 0;
+      background: var(--panel);
+      border: 1px solid rgba(255, 149, 50, 0.35);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: min(65vh, 36rem);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+    .data-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #4a5362;
+      color: var(--text);
+      font-weight: 600;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 2px solid var(--brand);
+      white-space: nowrap;
+    }
+    .data-table tbody td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table tbody tr:hover td {
+      background: rgba(255, 149, 50, 0.08);
+    }
+    .data-table.auction-table {
+      width: max-content;
+      min-width: 100%;
+      font-size: 0.76rem;
+    }
+    .data-table.auction-table thead th {
+      white-space: normal;
+      max-width: 9.5rem;
+      min-width: 4.5rem;
+      word-break: break-word;
+      vertical-align: bottom;
+      line-height: 1.25;
+      font-size: 0.68rem;
+      font-weight: 600;
+    }
+    .data-table.auction-table tbody td {
+      max-width: 14rem;
+      word-break: break-word;
+      white-space: normal;
+    }
+    .data-table.auction-table thead th.col-tags,
+    .data-table.auction-table tbody td.col-tags {
+      min-width: 28rem;
+      max-width: 36rem;
+      white-space: normal;
+      word-break: break-word;
+    }
+    .data-table.auction-table tbody td.cell-num {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      max-width: none;
+      color: var(--text);
+    }
+    .data-table.auction-table tbody td.cell-id {
+      color: var(--brand);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .data-table .col-index {
+      width: 1%;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+      text-align: right;
+    }
+    .data-table.kv-table .col-key {
+      color: var(--brand);
+      font-weight: 600;
+      width: 28%;
+      word-break: break-word;
+    }
+    .data-table.kv-table .col-val {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.78rem;
+      word-break: break-word;
+    }
+    .empty-row {
+      margin: 0;
+      padding: 1rem;
+      color: var(--muted);
+      text-align: center;
+      background: var(--panel);
+      border: 1px solid rgba(255, 149, 50, 0.35);
+      border-radius: 10px;
+    }
+    .pref-panel {
+      margin-top: 1.25rem;
+      width: 100%;
+      text-align: left;
+      background: var(--panel);
+      border: 1px solid rgba(255, 149, 50, 0.45);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+    .pref-panel h2 {
+      margin: 0 0 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--brand);
+    }
+    .pref-panel .pref-key {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin: 0.55rem 0 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .pref-panel .pref-key:first-of-type {
+      margin-top: 0;
+    }
+    .pref-panel .pref-val {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.45;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .pref-panel .pref-val.empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .pref-panel .pref-meta {
+      margin: 0 0 0.65rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+    .pref-panel .pref-status {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+    }
+    .pref-panel .pref-status.hit {
+      background: rgba(255, 149, 50, 0.2);
+      color: var(--brand);
+    }
+    .pref-panel .pref-status.miss {
+      background: rgba(142, 152, 168, 0.25);
+      color: var(--muted);
+    }
+    .eng-table-wrap {
+      overflow-x: auto;
+      margin-top: 0.35rem;
+      max-height: 22rem;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 149, 50, 0.25);
+      border-radius: 8px;
+    }
+    .eng-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .eng-table th,
+    .eng-table td {
+      padding: 0.35rem 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      white-space: nowrap;
+    }
+    .eng-table th {
+      position: sticky;
+      top: 0;
+      background: #1a1f2a;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .eng-table td.title {
+      white-space: normal;
+      word-break: break-word;
+      max-width: 9rem;
+    }
+    .eng-table tr:last-child td {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Dealer Intelligence playground</h1>
+    <p class="sub">Calls this host’s API. <code>live</code> and <code>suggested_full</code> return auction arrays; <code>suggested_ids</code> returns ranked ids only.</p>
+
+    <form id="f" onsubmit="return false;">
+      <div class="row">
+        <div>
+          <label for="endpoint">Endpoint</label>
+          <select id="endpoint">
+            <option value="live" selected>/api/v1/live/</option>
+            <option value="suggested_ids">/api/v1/suggested_ids/</option>
+            <option value="suggested_full">/api/v1/suggested_full/</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="dealer">X-Dealer-Id</label>
+      <p class="hint">Required for <code>suggested_ids</code> and <code>suggested_full</code>.</p>
+      <input id="dealer" inputmode="numeric" placeholder="451301" autocomplete="off" />
+
+      <div class="actions">
+        <button type="button" class="primary" id="btnAuctions">Fetch</button>
+        <button type="button" class="secondary" id="btnHealth">GET /healthz</button>
+      </div>
+    </form>
+
+    <section class="pref-panel" id="prefPanel" aria-live="polite">
+      <h2>
+        Dealer extraction (Redis)
+        <span class="pref-status miss" id="prefStatus">not loaded</span>
+      </h2>
+      <p class="pref-meta" id="prefMeta">Enter X-Dealer-Id and fetch to load preferences from Redis.</p>
+      <p class="pref-key">Comment</p>
+      <p class="pref-val empty" id="prefComment">—</p>
+      <p class="pref-key">Brand</p>
+      <p class="pref-val empty" id="prefBrand">—</p>
+      <p class="pref-key">Model</p>
+      <p class="pref-val empty" id="prefModel">—</p>
+    </section>
+
+    <section class="pref-panel" id="engPanel" aria-live="polite">
+      <h2>
+        Dealer model engagement (Redis)
+        <span class="pref-status miss" id="engStatus">not loaded</span>
+      </h2>
+      <p class="pref-meta" id="engMeta">Enter X-Dealer-Id and fetch to load top models from Redis.</p>
+      <div class="eng-table-wrap" id="engTableWrap">
+        <p class="pref-val empty" id="engEmpty">—</p>
+      </div>
+    </section>
+
+    <div class="out">
+      <div class="meta" id="meta"></div>
+      <div id="out" class="out-body">—</div>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const meta = $("meta");
+    const out = $("out");
+
+    function logPlayground(msg) {
+      console.log("[playground] " + msg);
+    }
+
+    function baseUrl() {
+      return window.location.origin.replace(/\/$/, "");
+    }
+
+    function buildRequestUrl() {
+      const mode = $("endpoint").value;
+      const root = baseUrl() + "/";
+      return new URL("/api/v1/" + mode + "/", root).toString();
+    }
+
+    function requestLabel() {
+      return "/api/v1/" + $("endpoint").value + "/";
+    }
+
+    function headers() {
+      const h = { Accept: "application/json" };
+      const d = $("dealer").value.trim();
+      if (d) h["X-Dealer-Id"] = d;
+      return h;
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function extractAuctionItemArray(body) {
+      if (Array.isArray(body)) {
+        if (body.length === 0) return [];
+        const first = body[0];
+        if (first !== null && typeof first === "object" && !Array.isArray(first)) return body;
+        return null;
+      }
+      if (body && typeof body === "object" && Array.isArray(body.results)) {
+        const r = body.results;
+        if (r.length === 0) return [];
+        const first = r[0];
+        if (first !== null && typeof first === "object" && !Array.isArray(first)) return r;
+        return null;
+      }
+      return null;
+    }
+
+    /** Flatten nested objects into dotted keys; arrays become one JSON cell. */
+    function flattenAuctionRow(obj, prefix) {
+      const out = {};
+      if (obj === null || obj === undefined) {
+        out[prefix || "null"] = "";
+        return out;
+      }
+      if (typeof obj !== "object") {
+        out[prefix] = obj;
+        return out;
+      }
+      if (Array.isArray(obj)) {
+        out[prefix || "[]"] = JSON.stringify(obj);
+        return out;
+      }
+      const keys = Object.keys(obj);
+      if (keys.length === 0) {
+        out[prefix || "{}"] = "{}";
+        return out;
+      }
+      for (let i = 0; i < keys.length; i++) {
+        const k = keys[i];
+        const path = prefix ? prefix + "." + k : k;
+        const v = obj[k];
+        if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+          Object.assign(out, flattenAuctionRow(v, path));
+        } else if (Array.isArray(v)) {
+          out[path] = JSON.stringify(v);
+        } else {
+          out[path] = v;
+        }
+      }
+      return out;
+    }
+
+    function formatCellVal(v) {
+      if (v === null || v === undefined) return "";
+      if (typeof v === "boolean") return v ? "true" : "false";
+      return String(v);
+    }
+
+    var AUCTION_COL_PRIORITY = [
+      "id",
+      "end_time",
+      "last_price",
+      "start_price",
+      "fair_market_price",
+      "finished",
+      "step",
+      "night_mode",
+      "car_properties.brand",
+      "car_properties.model",
+      "car_properties.trim",
+      "car_properties.year",
+      "car_properties.option",
+      "branch.city",
+      "car_specifications.klm",
+      "bid.highest",
+      "bid.user_latest",
+      "main_images.url",
+      "inspection",
+      "end",
+    ];
+
+    function sortAuctionColumns(allKeys) {
+      const set = new Set(allKeys);
+      const out = [];
+      for (let i = 0; i < AUCTION_COL_PRIORITY.length; i++) {
+        const p = AUCTION_COL_PRIORITY[i];
+        if (set.has(p)) {
+          out.push(p);
+          set.delete(p);
+        }
+      }
+      const rest = Array.from(set).sort(function (a, b) {
+        return a.localeCompare(b);
+      });
+      return out.concat(rest);
+    }
+
+    function colClassForHeader(col) {
+      return "col-" + col.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
+    }
+
+    function tdClassForColumn(col) {
+      if (col === "id") return " cell-id";
+      if (
+        /price|\.highest$|^step$|^end$|klm|_price$/i.test(col) ||
+        col === "last_price" ||
+        col === "start_price"
+      )
+        return " cell-num";
+      return "";
+    }
+
+    function renderAuctionWideTable(items) {
+      const flatRows = [];
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        if (it && typeof it === "object" && !Array.isArray(it)) {
+          flatRows.push(flattenAuctionRow(it, ""));
+        }
+      }
+      if (flatRows.length === 0) {
+        return '<p class="empty-row">No row objects to display.</p>';
+      }
+      const colSet = new Set();
+      for (let r = 0; r < flatRows.length; r++) {
+        const keys = Object.keys(flatRows[r]);
+        for (let c = 0; c < keys.length; c++) colSet.add(keys[c]);
+      }
+      const columns = sortAuctionColumns(Array.from(colSet));
+      const ths = columns.map(function (col) {
+        const hcls = colClassForHeader(col);
+        return (
+          '<th class="' +
+          hcls +
+          '" title="' +
+          esc(col) +
+          '">' +
+          esc(col.replace(/\./g, " · ")) +
+          "</th>"
+        );
+      });
+      const trs = [];
+      for (let r = 0; r < flatRows.length; r++) {
+        const row = flatRows[r];
+        const tds = columns.map(function (col) {
+          const raw = row.hasOwnProperty(col) ? row[col] : "";
+          const cls = (colClassForHeader(col) + tdClassForColumn(col)).trim();
+          return "<td" + (cls ? ' class="' + cls + '"' : "") + ">" + esc(formatCellVal(raw)) + "</td>";
+        });
+        trs.push("<tr><td class=\"col-index\">" + String(r + 1) + "</td>" + tds.join("") + "</tr>");
+      }
+      return (
+        '<div class="table-wrap"><table class="data-table auction-table"><thead><tr><th class="col-index">#</th>' +
+        ths.join("") +
+        "</tr></thead><tbody>" +
+        trs.join("") +
+        "</tbody></table></div>"
+      );
+    }
+
+    function renderBody(body) {
+      if (typeof body === "string") {
+        return '<pre class="out-json">' + esc(body) + "</pre>";
+      }
+      const items = extractAuctionItemArray(body);
+      if (items !== null) {
+        if (items.length === 0) {
+          return '<p class="empty-row">No items in the list.</p>';
+        }
+        return renderAuctionWideTable(items);
+      }
+      if (body && typeof body === "object" && !Array.isArray(body)) {
+        const keys = Object.keys(body);
+        if (keys.length === 0) {
+          return '<pre class="out-json">' + esc(JSON.stringify(body, null, 2)) + "</pre>";
+        }
+        const rows = keys.map(function (k, i) {
+          return (
+            "<tr><td class=\"col-index\">" +
+            String(i + 1) +
+            "</td><td class=\"col-key\">" +
+            esc(k) +
+            '</td><td class="col-val">' +
+            esc(JSON.stringify(body[k])) +
+            "</td></tr>"
+          );
+        });
+        return (
+          '<div class="table-wrap"><table class="data-table kv-table">' +
+          "<thead><tr><th class=\"col-index\">#</th><th>key</th><th>value</th></tr></thead><tbody>" +
+          rows.join("") +
+          "</tbody></table></div>"
+        );
+      }
+      return '<pre class="out-json">' + esc(JSON.stringify(body, null, 2)) + "</pre>";
+    }
+
+    function countAuctions(body) {
+      if (Array.isArray(body)) return body.length;
+      if (!body || typeof body !== "object") return null;
+      if (Array.isArray(body.auction_ids)) return body.auction_ids.length;
+      return null;
+    }
+
+    function formatPrefList(values) {
+      if (!Array.isArray(values) || values.length === 0) return null;
+      return values.join("، ");
+    }
+
+    function renderPrefEmpty(message) {
+      $("prefStatus").textContent = "not loaded";
+      $("prefStatus").className = "pref-status miss";
+      $("prefMeta").textContent = message;
+      $("prefComment").textContent = "Nothing retrieved";
+      $("prefComment").className = "pref-val empty";
+      $("prefBrand").textContent = "Nothing retrieved";
+      $("prefBrand").className = "pref-val empty";
+      $("prefModel").textContent = "Nothing retrieved";
+      $("prefModel").className = "pref-val empty";
+    }
+
+    function renderPrefValue(el, value) {
+      if (value === null || value === undefined || value === "") {
+        el.textContent = "Nothing retrieved";
+        el.className = "pref-val empty";
+        return;
+      }
+      el.textContent = String(value);
+      el.className = "pref-val";
+    }
+
+    function renderPrefPanel(data) {
+      if (!data || typeof data !== "object") {
+        renderPrefEmpty("Could not load dealer extraction from Redis.");
+        return;
+      }
+      const found = !!data.found;
+      $("prefStatus").textContent = found ? "found" : "miss";
+      $("prefStatus").className = "pref-status " + (found ? "hit" : "miss");
+      const keyLine = data.redis_key ? "Key: " + data.redis_key : "";
+      const dealerLine = data.dealer_id ? "Dealer: " + data.dealer_id : "";
+      $("prefMeta").textContent = [dealerLine, keyLine].filter(Boolean).join(" · ");
+      renderPrefValue($("prefComment"), data.comment);
+      const brandText = formatPrefList(data.brand);
+      const modelText = formatPrefList(data.model);
+      renderPrefValue($("prefBrand"), brandText);
+      renderPrefValue($("prefModel"), modelText);
+    }
+
+    function renderPrefLoading(dealerId) {
+      $("prefStatus").textContent = "loading…";
+      $("prefStatus").className = "pref-status miss";
+      $("prefMeta").textContent = "Loading dealers_extractions:" + dealerId + " …";
+      $("prefComment").textContent = "…";
+      $("prefBrand").textContent = "…";
+      $("prefModel").textContent = "…";
+      ["prefComment", "prefBrand", "prefModel"].forEach(function (id) {
+        $(id).className = "pref-val empty";
+      });
+    }
+
+    function applyPrefFromResponse(response, dealerId) {
+      const trimmed = String(dealerId || "").trim();
+      if (!trimmed) {
+        renderPrefEmpty("No X-Dealer-Id — preferences not loaded from Redis.");
+        return;
+      }
+      const raw = response.headers.get("X-Dealer-Extraction");
+      if (!raw) {
+        renderPrefEmpty("Nothing retrieved from Redis.");
+        logPlayground("[pref] no X-Dealer-Extraction header");
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        renderPrefPanel(data);
+        logPlayground(
+          "[pref] found=" +
+            !!data.found +
+            " brand=" +
+            (Array.isArray(data.brand) ? data.brand.length : 0) +
+            " model=" +
+            (Array.isArray(data.model) ? data.model.length : 0)
+        );
+      } catch (e) {
+        renderPrefEmpty("Could not parse dealer extraction from response.");
+        logPlayground("[pref] parse error · " + String(e.message || e));
+      }
+    }
+
+    function renderEngEmpty(message) {
+      $("engStatus").textContent = "not loaded";
+      $("engStatus").className = "pref-status miss";
+      $("engMeta").textContent = message;
+      $("engTableWrap").innerHTML = '<p class="pref-val empty" id="engEmpty">Nothing retrieved</p>';
+    }
+
+    function renderEngLoading(dealerId) {
+      $("engStatus").textContent = "loading…";
+      $("engStatus").className = "pref-status miss";
+      $("engMeta").textContent = "Loading dealer_model_engagement:" + dealerId + " …";
+      $("engTableWrap").innerHTML = '<p class="pref-val empty" id="engEmpty">…</p>';
+    }
+
+    function formatEngTitle(primary, english) {
+      const p = primary != null && String(primary).trim() ? String(primary).trim() : "";
+      const e = english != null && String(english).trim() ? String(english).trim() : "";
+      if (p && e && p !== e) return p + " / " + e;
+      return p || e || "—";
+    }
+
+    function renderEngPanel(data) {
+      if (!data || typeof data !== "object") {
+        renderEngEmpty("Could not load dealer engagement from Redis.");
+        return;
+      }
+      const found = !!data.found;
+      $("engStatus").textContent = found ? "found" : "miss";
+      $("engStatus").className = "pref-status " + (found ? "hit" : "miss");
+      const parts = [];
+      if (data.dealer_id) parts.push("Dealer: " + data.dealer_id);
+      if (data.redis_key) parts.push("Key: " + data.redis_key);
+      if (data.updated_at) parts.push("Updated: " + data.updated_at);
+      const shown = Array.isArray(data.scores) ? data.scores.length : 0;
+      const total = data.total_models != null ? data.total_models : shown;
+      const brandShown = Array.isArray(data.brands) ? data.brands.length : 0;
+      const brandTotal = data.total_brands != null ? data.total_brands : brandShown;
+      parts.push("Models top " + shown + " of " + total);
+      parts.push("Brands " + brandShown + " of " + brandTotal);
+      $("engMeta").textContent = parts.join(" · ");
+
+      if (!found || !Array.isArray(data.scores) || data.scores.length === 0) {
+        $("engTableWrap").innerHTML =
+          '<p class="pref-val empty" id="engEmpty">Nothing retrieved</p>';
+        return;
+      }
+
+      let html =
+        '<p class="pref-key">Top models (by model rank)</p>' +
+        '<table class="eng-table"><thead><tr>' +
+        "<th>Model rank</th><th>Brand rank</th><th>Score</th>" +
+        "<th>Brand id</th><th>Model id</th><th>Brand</th><th>Model</th>" +
+        "</tr></thead><tbody>";
+      data.scores.forEach(function (row) {
+        html +=
+          "<tr>" +
+          "<td>" +
+          esc(row.rank) +
+          "</td>" +
+          "<td>" +
+          esc(row.brand_rank != null ? row.brand_rank : "—") +
+          "</td>" +
+          "<td>" +
+          esc(row.score) +
+          "</td>" +
+          "<td>" +
+          esc(row.brand_id != null ? row.brand_id : "—") +
+          "</td>" +
+          "<td>" +
+          esc(row.model_id != null ? row.model_id : "—") +
+          "</td>" +
+          '<td class="title">' +
+          esc(formatEngTitle(row.brand_title, row.brand_title_english)) +
+          "</td>" +
+          '<td class="title">' +
+          esc(formatEngTitle(row.model_title, row.model_title_english)) +
+          "</td>" +
+          "</tr>";
+      });
+      html += "</tbody></table>";
+
+      if (Array.isArray(data.brands) && data.brands.length > 0) {
+        html +=
+          '<p class="pref-key" style="margin-top:0.85rem">Brand ranks (best model rank of brand)</p>' +
+          '<table class="eng-table"><thead><tr>' +
+          "<th>Brand rank</th><th>Brand id</th><th>Brand</th>" +
+          "</tr></thead><tbody>";
+        data.brands.forEach(function (row) {
+          html +=
+            "<tr>" +
+            "<td>" +
+            esc(row.brand_rank) +
+            "</td>" +
+            "<td>" +
+            esc(row.brand_id != null ? row.brand_id : "—") +
+            "</td>" +
+            '<td class="title">' +
+            esc(formatEngTitle(row.brand_title, row.brand_title_english)) +
+            "</td>" +
+            "</tr>";
+        });
+        html += "</tbody></table>";
+      }
+
+      $("engTableWrap").innerHTML = html;
+    }
+
+    function applyEngFromResponse(response, dealerId) {
+      const trimmed = String(dealerId || "").trim();
+      if (!trimmed) {
+        renderEngEmpty("No X-Dealer-Id — engagement not loaded from Redis.");
+        return;
+      }
+      const raw = response.headers.get("X-Dealer-Engagement");
+      if (!raw) {
+        renderEngEmpty("Nothing retrieved from Redis.");
+        logPlayground("[eng] no X-Dealer-Engagement header");
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        renderEngPanel(data);
+        logPlayground(
+          "[eng] found=" +
+            !!data.found +
+            " scores=" +
+            (Array.isArray(data.scores) ? data.scores.length : 0) +
+            " total=" +
+            (data.total_models != null ? data.total_models : "?")
+        );
+      } catch (e) {
+        renderEngEmpty("Could not parse dealer engagement from response.");
+        logPlayground("[eng] parse error · " + String(e.message || e));
+      }
+    }
+
+    async function runFetch(url, label) {
+      $("btnAuctions").disabled = true;
+      $("btnHealth").disabled = true;
+      meta.textContent = "Loading…";
+      out.innerHTML = "";
+      const dealerId = $("dealer").value.trim();
+      if (dealerId) {
+        renderPrefLoading(dealerId);
+        renderEngLoading(dealerId);
+      }
+      logPlayground("→ " + label + " " + url);
+      const started = performance.now();
+      try {
+        const hdrs = headers();
+        logPlayground("headers: " + JSON.stringify(hdrs));
+        const r = await fetch(url, { headers: hdrs });
+        const elapsedMs = Math.round(performance.now() - started);
+        const ct = r.headers.get("content-type") || "";
+        const body = ct.includes("application/json") ? await r.json() : await r.text();
+        const auctionCount = countAuctions(body);
+        let line =
+          (r.ok ? "[OK] " : "[ERR] ") +
+          r.status +
+          (r.statusText ? " " + r.statusText : "") +
+          " · " +
+          elapsedMs +
+          " ms";
+        if (auctionCount !== null) {
+          line += " · " + auctionCount + " auction" + (auctionCount === 1 ? "" : "s");
+        }
+        line += " · " + label + "\n" + url;
+        logPlayground(
+          (r.ok ? "[OK] " : "[ERR] ") +
+            r.status +
+            " · " +
+            elapsedMs +
+            " ms" +
+            (auctionCount !== null ? " · " + auctionCount + " auctions" : "") +
+            " · " +
+            label
+        );
+        if (!r.ok && typeof body === "object" && body && body.detail) {
+          line += "\n\n" + body.detail;
+          logPlayground("detail: " + body.detail);
+        }
+        meta.textContent = line;
+        out.innerHTML = renderBody(body);
+        applyPrefFromResponse(r, dealerId);
+        applyEngFromResponse(r, dealerId);
+      } catch (e) {
+        const elapsedMs = Math.round(performance.now() - started);
+        const msg = String(e.message || e);
+        meta.textContent = "[ERR] " + elapsedMs + " ms · " + msg;
+        logPlayground("[ERR] " + elapsedMs + " ms · " + msg);
+        out.innerHTML = "";
+        if (dealerId) {
+          renderPrefEmpty("Request failed — nothing retrieved from Redis.");
+          renderEngEmpty("Request failed — nothing retrieved from Redis.");
+        } else {
+          renderPrefEmpty("No X-Dealer-Id — preferences not loaded from Redis.");
+          renderEngEmpty("No X-Dealer-Id — engagement not loaded from Redis.");
+        }
+      } finally {
+        $("btnAuctions").disabled = false;
+        $("btnHealth").disabled = false;
+      }
+    }
+
+    $("btnAuctions").onclick = () => runFetch(buildRequestUrl(), requestLabel());
+    $("btnHealth").onclick = () => {
+      const url = new URL("/healthz", baseUrl() + "/").toString();
+      runFetch(url, "healthz");
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+include:
+  - project: 'Khodro45/ci-templates'
+    ref: main
+    file: 'shared.gitlab-ci.yml'
+
+  - local: 'ci/dev.yml'
+  - local: 'ci/prod.yml'
+
+stages:
+  - build
+  - deploy

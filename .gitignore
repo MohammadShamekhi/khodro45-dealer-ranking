@@ -1,0 +1,83 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Data & exports
+data/
+*.csv
+docs/
+*.png
+load_test_results/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE & editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# Type checking & lint caches
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# Logs & local runtime
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local tooling
+.cursor/

@@ -1,0 +1,36 @@
+build_production:
+  extends: .darkube_build
+  variables:
+    IMAGE_NAME: prod-learning-to-rank
+    DOCKERFILE: ./Dockerfile
+    EXTRA_FLAGS: >-
+      --build-arg JFROG_USER=${JFROG_USER}
+      --build-arg JFROG_PASS=${JFROG_PASS}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "prod"'
+
+
+approve_production_deploy:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Production deployment approved"
+  when: manual
+  allow_failure: false
+  needs:
+    - build_production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "prod"'
+
+
+production_deploy:
+  extends: .darkube_deploy
+  needs:
+    - build_production
+    - approve_production_deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "prod"'
+
+  variables:
+    DEPLOY_TOKEN: $DEPLOY_TOKEN_AI_LEARNING_TO_RANK_K45_AI_KHODRO45_C54
+    APP_ID: $APP_ID_AI_LEARNING_TO_RANK_K45_AI_KHODRO45_C54
